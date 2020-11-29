@@ -16,6 +16,8 @@ public slots:
     void on_bWaitConnection_clicked();
     // Нажатие на кнопку "Подключиться"
     void on_bConnect_clicked();
+    // Обработка выстрела игрока
+    void on_fvEnemy_playerShot(int i, int j);
 
 private:
     Ui::SeaBattleWindowClass ui;
