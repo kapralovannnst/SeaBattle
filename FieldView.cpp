@@ -23,6 +23,32 @@ FieldView::~FieldView()
     delete field;
 }
 
+void FieldView::restoreShips()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            switch (field->get(i, j))
+            {
+            case Field::hit:
+                field->set(i, j, Field::ship);
+                break;
+            case Field::miss:
+                field->set(i, j, Field::empty);
+                break;
+            }
+        }
+    }
+    repaint();
+}
+
+void FieldView::clearField()
+{
+    field->clear();
+    repaint();
+}
+
 void FieldView::enableAim()
 {
     aim = true;

@@ -44,6 +44,9 @@
     <ClCompile Include="FieldView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SeaBattleControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="SeaBattleWindow.ui">
@@ -57,6 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="FieldView.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SeaBattleControl.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -21,6 +21,10 @@ public:
     void initShips() { field->initShips(); }
     // Игра окончена?
     bool gameOver() { return field->gameOver(); }
+    // Восстановить корабли
+    void restoreShips();
+    // Очистить поле
+    void clearField();
     // Включить режим прицеливания
     void enableAim();
     // Выключить режим прицеливания
