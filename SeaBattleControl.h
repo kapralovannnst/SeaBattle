@@ -59,11 +59,11 @@ private slots:
     // Новое соединение с сервером
     void serverNewConnection();
     // Ошибка сервера
-    void serverAcceptError();
+    void serverAcceptError(QAbstractSocket::SocketError);
     // Клиент подключился
     void clientConnected();
     // Ошибка сокета
-    void errorOccurred(QAbstractSocket::SocketError socketError);
+    void errorOccurred(QAbstractSocket::SocketError);
     // Получение данных по сети
     void socketReadyRead();
 

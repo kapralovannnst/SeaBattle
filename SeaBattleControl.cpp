@@ -18,7 +18,8 @@ SeaBattleControl::SeaBattleControl(SeaBattleWindow* parent)
     connect(this, SIGNAL(gameOver(bool)), window, SLOT(gameOver(bool)), Qt::QueuedConnection);
     connect(this, SIGNAL(networkError(const QString&)), window, SLOT(networkError(const QString&)), Qt::QueuedConnection);
     connect(&tcpServer, SIGNAL(newConnection()), this, SLOT(serverNewConnection()));
-    connect(&tcpServer, SIGNAL(acceptError()), this, SLOT(serverAcceptError()));
+    connect(&tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)),
+        this, SLOT(serverAcceptError(QAbstractSocket::SocketError)));
 }
 
 SeaBattleControl::~SeaBattleControl()
@@ -34,7 +35,8 @@ void SeaBattleControl::initGame()
 
 void SeaBattleControl::startServer()
 {
-    tcpServer.listen(QHostAddress::Any, port);
+    if (!tcpServer.listen(QHostAddress::Any, port))
+        emit networkError(tcpServer.errorString());
 }
 
 void SeaBattleControl::stopServer()
@@ -100,7 +102,7 @@ void SeaBattleControl::serverNewConnection()
     }
 }
 
-void SeaBattleControl::serverAcceptError()
+void SeaBattleControl::serverAcceptError(QAbstractSocket::SocketError socketError)
 {
     emit networkError(tcpServer.errorString());
 }
