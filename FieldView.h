@@ -51,6 +51,9 @@ private:
     void drawField(QPainter& p);
     // Нарисовать прицел
     void drawAim(QPainter& p);
+    // Мигание клетки выстрела
+    void animateFire(int i, int j);
+
     // Для рисования виджета
     static QPen shipPen;
     static QPen missPen;
@@ -66,4 +69,9 @@ private:
     // Позиция прицела
     int aim_i;
     int aim_j;
+    // Координаты выстрела противника
+    int shot_i;
+    int shot_j;
+    // Подсветить клетку выстрела
+    bool fire;
 };

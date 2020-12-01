@@ -1,5 +1,6 @@
 #include "FieldView.h"
 #include <QMouseEvent>
+#include <QThread>
 
 QPen FieldView::shipPen(Qt::blue, 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 QPen FieldView::missPen(Qt::black, 1);
@@ -16,6 +17,9 @@ FieldView::FieldView(QWidget *parent)
     aim = false;
     aim_i = -1;
     aim_j = -1;
+    shot_i = -1;
+    shot_j = -1;
+    fire = false;
 }
 
 FieldView::~FieldView()
@@ -69,7 +73,7 @@ void FieldView::disableAim()
 unsigned int FieldView::enemyShot(int i, int j)
 {
     unsigned int result = field->shot(i, j);
-    repaint();
+    animateFire(i, j);
     return result;
 }
 
@@ -120,6 +124,7 @@ void FieldView::mousePressEvent(QMouseEvent* e)
             int i = aim_i, j = aim_j;
             disableAim();
             emit playerShot(i, j);
+            animateFire(i, j);
         }
     }
 }
@@ -164,6 +169,10 @@ void FieldView::drawField(QPainter& p)
                 p.drawEllipse(x + 12, y + 12, 6, 6);
             }
         }
+
+    // Подсветка клетки выстрела
+    if (fire)
+        p.fillRect(shot_j * 30 + 31, shot_i * 30 + 31, 29, 29, Qt::red);
 }
 
 void FieldView::drawAim(QPainter& p)
@@ -191,5 +200,19 @@ void FieldView::drawAim(QPainter& p)
     else
     {
         unsetCursor();
+    }
+}
+
+void FieldView::animateFire(int i, int j)
+{
+    shot_i = i;
+    shot_j = j;
+    fire = true;
+    repaint();
+    for (int f = 0; f < 5; f++)
+    {
+        QThread::msleep(100);
+        fire = f & 1;
+        repaint();
     }
 }
