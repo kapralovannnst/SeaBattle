@@ -1,6 +1,6 @@
 #include "SeaBattleWindow.h"
 #include "SeaBattleControl.h"
-#include <QMessageBox>
+#include "SettingsDialog.h"
 
 SeaBattleWindow::SeaBattleWindow(QWidget *parent)
     : QDialog(parent)
@@ -21,9 +21,11 @@ void SeaBattleWindow::on_bWaitConnection_clicked()
 {
     if (ui.bWaitConnection->text() == "Ждать подключения")
     {
-        ui.leIPAddress->hide();
-        ui.bConnect->hide();
         ui.bWaitConnection->setText("Остановить ожидание");
+        ui.bSettings->hide();
+        ui.lAddress->hide();
+        ui.leAddress->hide();
+        ui.bConnect->hide();
         QApplication::processEvents();
         control->startServer();
     }
@@ -35,16 +37,38 @@ void SeaBattleWindow::on_bWaitConnection_clicked()
     }
 }
 
+void SeaBattleWindow::on_bSettings_clicked()
+{
+    SettingsDialog* dlg = new SettingsDialog(this);
+    dlg->setPort(control->getPort());
+    dlg->setFirstMove(control->getFirstMove());
+    if (QDialog::Accepted == dlg->exec())
+    {
+        control->setPort(dlg->getPort());
+        control->setFirstMove(dlg->getFirstMove());
+    }
+}
+
 void SeaBattleWindow::on_bConnect_clicked()
 {
     if (ui.bConnect->text() == "Подключиться")
     {
-        QString ipAddress = ui.leIPAddress->text();
-        ui.leIPAddress->setDisabled(true);
-        ui.bWaitConnection->hide();
-        ui.bConnect->setText("Остановить");
-        QApplication::processEvents();
-        control->connectClient(ipAddress);
+        QString address = ui.leAddress->text();
+        if (address.isEmpty())
+        {
+            messageBox(QMessageBox::Warning, "Ошибка",
+                "Введите IP-адрес или DNS-имя узла для подключения");
+        }
+        else
+        {
+            ui.bWaitConnection->hide();
+            ui.bSettings->hide();
+            ui.lAddress->setDisabled(true);
+            ui.leAddress->setDisabled(true);
+            ui.bConnect->setText("Остановить");
+            QApplication::processEvents();
+            control->connectClient(address);
+        }
     }
     else
     {
@@ -61,8 +85,8 @@ void SeaBattleWindow::gameOver(bool victory)
     else
         control->disconnectClient();
     restoreButtons();
-    QMessageBox::information(this, "Игра окончена",
-        victory ? "Поздравляю, Вы победили!" : "К сожалению, Вы проиграли!");
+    messageBox(QMessageBox::Information, "Игра окончена",
+        victory ? "Вы победили!" : "Вы проиграли!");
     restoreFields();
 }
 
@@ -83,16 +107,27 @@ void SeaBattleWindow::networkError(const QString& text)
     else
         control->disconnectClient();
     restoreButtons();
-    QMessageBox::critical(this, "Ошибка", text);
+    messageBox(QMessageBox::Critical, "Ошибка", text);
     restoreFields();
+}
+
+void SeaBattleWindow::messageBox(QMessageBox::Icon icon, const QString& title, const QString& text)
+{
+    QMessageBox* mb = new QMessageBox(icon, title, text, QMessageBox::Ok, this);
+    mb->setFont(ui.lAddress->font());
+    mb->exec();
+    delete mb;
 }
 
 void SeaBattleWindow::restoreButtons()
 {
     ui.bWaitConnection->setText("Ждать подключения");
     ui.bWaitConnection->show();
-    ui.leIPAddress->setEnabled(true);
-    ui.leIPAddress->show();
+    ui.bSettings->show();
+    ui.lAddress->setEnabled(true);
+    ui.lAddress->show();
+    ui.leAddress->setEnabled(true);
+    ui.leAddress->show();
     ui.bConnect->setText("Подключиться");
     ui.bConnect->show();
 }

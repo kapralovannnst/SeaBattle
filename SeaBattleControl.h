@@ -12,11 +12,29 @@ class SeaBattleControl : public QObject
     Q_OBJECT
 
 public:
-    // Порт сервера
-    static const unsigned short serverPort = 57382;
+    // Сетевой порт по умолчанию
+    static const unsigned short defaultPort = 57382;
+
+    // Режим выбора первого хода (только сервер)
+    static const unsigned int firstMoveRandom = 0;  // Случайно
+    static const unsigned int firstMoveServer = 1;  // Сервер
+    static const unsigned int firstMoveClient = 2;  // Клиент
 
     SeaBattleControl(SeaBattleWindow* parent);
     ~SeaBattleControl();
+
+    // Получить порт
+    unsigned short getPort() const { return port; }
+    // Установить порт
+    void setPort(unsigned short p) { port = p; }
+    // Получить режим выбора первого хода
+    unsigned int getFirstMove() const { return firstMove; }
+    // Установить режим выбора первого хода
+    void setFirstMove(unsigned int fm)
+    {
+        if (fm <= firstMoveClient)
+            firstMove = fm;
+    }
 
     // Инициализация игры
     void initGame();
@@ -25,7 +43,7 @@ public:
     // Остановить сервер
     void stopServer();
     // Подключиться к серверу
-    void connectClient(const QString& ipAddress);
+    void connectClient(const QString& address);
     // Отключиться от сервера
     void disconnectClient();
 
@@ -73,6 +91,10 @@ private:
 
     // Главное окно игры
     SeaBattleWindow* window;
+    // Сетевой порт
+    unsigned short port;
+    // Режим выбора первого хода
+    unsigned int firstMove;
     // Ход (true - игрок, false - противник)
     bool move;
     // Режим ожидания данных

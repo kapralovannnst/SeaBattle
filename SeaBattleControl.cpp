@@ -7,6 +7,8 @@ SeaBattleControl::SeaBattleControl(SeaBattleWindow* parent)
     : QObject(parent)
 {
     window = parent;
+    port = defaultPort;
+    firstMove = firstMoveRandom;
     move = false;
     mode = 0;
     shot_i = -1;
@@ -32,7 +34,7 @@ void SeaBattleControl::initGame()
 
 void SeaBattleControl::startServer()
 {
-    tcpServer.listen(QHostAddress::Any, serverPort);
+    tcpServer.listen(QHostAddress::Any, port);
 }
 
 void SeaBattleControl::stopServer()
@@ -50,13 +52,13 @@ void SeaBattleControl::stopServer()
         tcpServer.close();
 }
 
-void SeaBattleControl::connectClient(const QString& ipAddress)
+void SeaBattleControl::connectClient(const QString& address)
 {
     socket = new QTcpSocket;
     connect(socket, SIGNAL(connected()), this, SLOT(clientConnected()));
     connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
         this, SLOT(errorOccurred(QAbstractSocket::SocketError)));
-    socket->connectToHost(ipAddress, serverPort);
+    socket->connectToHost(address, port);
 }
 
 void SeaBattleControl::disconnectClient()
@@ -141,8 +143,20 @@ void SeaBattleControl::socketReadyRead()
 
 void SeaBattleControl::sendFirstMove()
 {
-    // Взять младший бит псевдослучайного числа
-    move = (QRandomGenerator::global()->generate() & 1);
+    switch (firstMove)
+    {
+    case firstMoveServer:
+        move = true;
+        break;
+    case firstMoveClient:
+        move = false;
+        break;
+    default:
+        // Взять младший бит псевдослучайного числа
+        move = (QRandomGenerator::global()->generate() & 1);
+        break;
+    }
+
     char x = move ? 0 : 1;
     socket->write(&x, 1);
     socket->flush();

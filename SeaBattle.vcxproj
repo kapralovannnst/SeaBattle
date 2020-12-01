@@ -86,6 +86,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SettingsDialog.cpp" />
     <QtRcc Include="SeaBattleWindow.qrc" />
     <QtUic Include="SeaBattleWindow.ui" />
     <QtMoc Include="SeaBattleWindow.h" />
@@ -94,9 +95,11 @@
     <ClCompile Include="SeaBattleControl.cpp" />
     <ClCompile Include="SeaBattleWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="SettingsDialog.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Field.h" />
+    <QtMoc Include="SettingsDialog.h" />
     <QtMoc Include="SeaBattleControl.h" />
     <QtMoc Include="FieldView.h" />
   </ItemGroup>
