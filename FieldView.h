@@ -29,6 +29,10 @@ public:
     void enableAim();
     // Выключить режим прицеливания
     void disableAim();
+    // Включить режим редактирования
+    void enableEditor();
+    // Выключить режим редактирования
+    void disableEditor();
     // Обработка выстрела противника
     unsigned int enemyShot(int i, int j);
     // Обработка результата выстрела игрока
@@ -37,6 +41,8 @@ public:
 signals:
     // Сигнал - выстрел игрока
     void playerShot(int i, int j);
+    // Сигнал - изменилась правильность расположения кораблей
+    void validPlacementChanged(bool valid);
 
 protected:
     // Событие рисования
@@ -53,6 +59,8 @@ private:
     void drawAim(QPainter& p);
     // Мигание клетки выстрела
     void animateFire(int i, int j);
+    // Рисование для редактора размещения кораблей
+    void drawEditor(QPainter& p);
 
     // Для рисования виджета
     static QPen shipPen;
@@ -60,15 +68,22 @@ private:
     static QPen hitPen;
     static QPen aimPen;
     static QPen aimFramePen;
+    static QPen editorFramePen;
     static QBrush shipBrush;
     static QBrush missBrush;
+    static QBrush editorBrush;
+
     // Игровое поле
     Field* field;
     // Режим прицеливания
     bool aim;
-    // Позиция прицела
-    int aim_i;
-    int aim_j;
+    // Режим редактирования
+    bool editor;
+    // Правильность размещения кораблей
+    bool validPlacement;
+    // Позиция курсора
+    int cur_i;
+    int cur_j;
     // Координаты выстрела противника
     int shot_i;
     int shot_j;

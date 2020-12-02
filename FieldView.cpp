@@ -7,16 +7,20 @@ QPen FieldView::missPen(Qt::black, 1);
 QPen FieldView::hitPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
 QPen FieldView::aimPen(Qt::green, 1);
 QPen FieldView::aimFramePen(Qt::green, 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
+QPen FieldView::editorFramePen(Qt::red, 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 QBrush FieldView::shipBrush("#A0A0FF");
 QBrush FieldView::missBrush(Qt::black);
+QBrush FieldView::editorBrush(Qt::green, Qt::DiagCrossPattern);
 
 FieldView::FieldView(QWidget *parent)
     : QFrame(parent)
 {
     field = new Field;
     aim = false;
-    aim_i = -1;
-    aim_j = -1;
+    editor = false;
+    validPlacement = true;
+    cur_i = -1;
+    cur_j = -1;
     shot_i = -1;
     shot_j = -1;
     fire = false;
@@ -65,8 +69,25 @@ void FieldView::disableAim()
     setMouseTracking(false);
     unsetCursor();
     aim = false;
-    aim_i = -1;
-    aim_j = -1;
+    cur_i = -1;
+    cur_j = -1;
+    repaint();
+}
+
+void FieldView::enableEditor()
+{
+    editor = true;
+    repaint();
+    setMouseTracking(true);
+}
+
+void FieldView::disableEditor()
+{
+    setMouseTracking(false);
+    unsetCursor();
+    editor = false;
+    cur_i = -1;
+    cur_j = -1;
     repaint();
 }
 
@@ -97,34 +118,52 @@ void FieldView::paintEvent(QPaintEvent* e)
     drawField(painter);
     if (aim)
         drawAim(painter);
+    if (editor)
+        drawEditor(painter);
     QFrame::paintEvent(e);
 }
 
 void FieldView::mouseMoveEvent(QMouseEvent* e)
 {
-    int old_i = aim_i, old_j = aim_j;
-    aim_i = e->y() / 30 - 1;
-    aim_j = e->x() / 30 - 1;
-    if (aim_i < 0 || aim_i > 9 || aim_j < 0 || aim_j > 9)
+    if (aim || editor)
     {
-        aim_i = -1;
-        aim_j = -1;
-    }
+        int old_i = cur_i, old_j = cur_j;
+        cur_i = e->y() / 30 - 1;
+        cur_j = e->x() / 30 - 1;
+        if (cur_i < 0 || cur_i > 9 || cur_j < 0 || cur_j > 9)
+        {
+            cur_i = -1;
+            cur_j = -1;
+        }
 
-    if (aim_i != old_i || aim_j != old_j)
-        repaint();
+        if (cur_i != old_i || cur_j != old_j)
+            repaint();
+    }
 }
 
 void FieldView::mousePressEvent(QMouseEvent* e)
 {
     if (aim && Qt::LeftButton == e->button())
     {
-        if (aim_i >= 0 && aim_j >= 0 && Field::empty == field->get(aim_i, aim_j))
+        if (cur_i >= 0 && cur_j >= 0 && Field::empty == field->get(cur_i, cur_j))
         {
-            int i = aim_i, j = aim_j;
+            int i = cur_i, j = cur_j;
             disableAim();
             emit playerShot(i, j);
             animateFire(i, j);
+        }
+    }
+
+    if (editor && Qt::LeftButton == e->button())
+    {
+        if (cur_i >= 0 && cur_j >= 0)
+        {
+            bool old = validPlacement;
+            field->toggle(cur_i, cur_j);
+            validPlacement = field->validPlacement();
+            repaint();
+            if (validPlacement != old)
+                emit validPlacementChanged(validPlacement);
         }
     }
 }
@@ -182,11 +221,11 @@ void FieldView::drawAim(QPainter& p)
     p.setBrush(Qt::transparent);
     p.drawRect(30, 30, 300, 300);
 
-    if (aim_i >= 0 && aim_j >= 0 && Field::empty == field->get(aim_i, aim_j))
+    if (cur_i >= 0 && cur_j >= 0 && Field::empty == field->get(cur_i, cur_j))
     {
         // Прицел
-        int x = 30 * aim_j + 30;
-        int y = 30 * aim_i + 30;
+        int x = 30 * cur_j + 30;
+        int y = 30 * cur_i + 30;
         p.setPen(aimPen);
         p.drawEllipse(x + 3, y + 3, 24, 24);
         p.drawEllipse(x + 6, y + 6, 18, 18);
@@ -214,5 +253,29 @@ void FieldView::animateFire(int i, int j)
         QThread::msleep(100);
         fire = f & 1;
         repaint();
+    }
+}
+
+void FieldView::drawEditor(QPainter& p)
+{
+    // Большая рамка
+    if (validPlacement)
+        p.setPen(aimFramePen);
+    else
+        p.setPen(editorFramePen);
+    p.setBrush(Qt::transparent);
+    p.drawRect(30, 30, 300, 300);
+
+    if (cur_i >= 0 && cur_j >= 0)
+    {
+        // Маленькая зелёная рамка
+        p.setPen(aimFramePen);
+        p.setBrush(editorBrush);
+        p.drawRect(30 * cur_j + 30, 30 * cur_i + 30, 30, 30);
+        setCursor(Qt::PointingHandCursor);
+    }
+    else
+    {
+        unsetCursor();
     }
 }

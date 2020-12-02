@@ -18,5 +18,6 @@ int main(int argc, char *argv[])
 
     SeaBattleWindow w;
     w.show();
+    w.showStartMessage();
     return a.exec();
 }

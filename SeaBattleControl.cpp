@@ -28,13 +28,9 @@ SeaBattleControl::~SeaBattleControl()
         delete socket;
 }
 
-void SeaBattleControl::initGame()
-{
-    window->getPlayerFV()->initShips();
-}
-
 void SeaBattleControl::startServer()
 {
+    window->getPlayerFV()->disableEditor();
     if (!tcpServer.listen(QHostAddress::Any, port))
         emit networkError(tcpServer.errorString());
 }
@@ -56,6 +52,7 @@ void SeaBattleControl::stopServer()
 
 void SeaBattleControl::connectClient(const QString& address)
 {
+    window->getPlayerFV()->disableEditor();
     socket = new QTcpSocket;
     connect(socket, SIGNAL(connected()), this, SLOT(clientConnected()));
     connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)),

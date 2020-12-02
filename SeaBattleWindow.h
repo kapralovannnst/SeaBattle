@@ -18,6 +18,9 @@ public:
     FieldView* getPlayerFV() { return ui.fvPlayer; }
     FieldView* getEnemyFV() { return ui.fvEnemy; }
 
+    // Показать стартовое сообщение
+    void showStartMessage();
+
 public slots:
     // Нажатие на кнопку "Ждать подключения"
     void on_bWaitConnection_clicked();
@@ -25,6 +28,8 @@ public slots:
     void on_bSettings_clicked();
     // Нажатие на кнопку "Подключиться"
     void on_bConnect_clicked();
+    // Изменилась правильность расположения кораблей
+    void on_fvPlayer_validPlacementChanged(bool valid);
     // Игра окончена
     void gameOver(bool victory);
     // Подключение к серверу

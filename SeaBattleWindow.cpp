@@ -9,12 +9,29 @@ SeaBattleWindow::SeaBattleWindow(QWidget *parent)
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     setWindowFlag(Qt::WindowMinimizeButtonHint, true);
     control = new SeaBattleControl(this);
-    control->initGame();
+    ui.fvPlayer->initShips();
 }
 
 SeaBattleWindow::~SeaBattleWindow()
 {
     delete control;
+}
+
+void SeaBattleWindow::showStartMessage()
+{
+    messageBox(QMessageBox::Information, windowTitle(),
+        "<html><head/><body>"
+        "<p>Для начала расставьте Ваши корабли по игровому полю:</p>"
+        "<ul><li>1 корабль из четырёх клеток (авианосец),</li>"
+        "<li>2 корабля из трёх клеток (линкоры),</li>"
+        "<li>3 корабля из двух клеток (эсминцы),</li>"
+        "<li>4 корабля из одной клетки (торпедные катера).</li></ul>"
+        "<p>Корабли не должны касаться друг друга!</p>"
+        "<p>Затем нажмите кнопку <i>\"Ждать подключения\"</i> "
+        "или введите адрес и нажмите кнопку <i>\"Подключиться\"</i>, чтобы начать игру. "
+        "Один из игроков должен ждать подключения, а другой - подключаться.</p>"
+        "</body></html>");
+    ui.fvPlayer->enableEditor();
 }
 
 void SeaBattleWindow::on_bWaitConnection_clicked()
@@ -78,6 +95,14 @@ void SeaBattleWindow::on_bConnect_clicked()
     }
 }
 
+void SeaBattleWindow::on_fvPlayer_validPlacementChanged(bool valid)
+{
+    ui.bWaitConnection->setEnabled(valid);
+    ui.lAddress->setEnabled(valid);
+    ui.leAddress->setEnabled(valid);
+    ui.bConnect->setEnabled(valid);
+}
+
 void SeaBattleWindow::gameOver(bool victory)
 {
     if (ui.bWaitConnection->isVisible())
@@ -137,4 +162,5 @@ void SeaBattleWindow::restoreFields()
     ui.fvEnemy->disableAim();
     ui.fvEnemy->clearField();
     ui.fvPlayer->restoreShips();
+    ui.fvPlayer->enableEditor();
 }

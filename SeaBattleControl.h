@@ -36,8 +36,6 @@ public:
             firstMove = fm;
     }
 
-    // Инициализация игры
-    void initGame();
     // Запустить сервер
     void startServer();
     // Остановить сервер

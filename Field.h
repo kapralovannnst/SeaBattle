@@ -33,6 +33,10 @@ public:
     void clear();
     // Начальная расстановка кораблей
     void initShips();
+    // Переключить клетку (корабль/пусто)
+    void toggle(int i, int j);
+    // Правильное размещение кораблей?
+    bool validPlacement();
     // Обработка выстрела противника
     unsigned int shot(int i, int j);
     // Игра окончена?

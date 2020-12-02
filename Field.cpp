@@ -30,6 +30,123 @@ void Field::initShips()
             data[7][j] = ship;
 }
 
+void Field::toggle(int i, int j)
+{
+    switch (get(i, j))
+    {
+    case empty:
+        data[i][j] = ship;
+        break;
+    case ship:
+        data[i][j] = empty;
+        break;
+    }
+}
+
+bool Field::validPlacement()
+{
+    // 1. Кол-во клеток-кораблей должно быть 20
+    int count = 0;
+    for (int i = 0; i < 10; i++)
+        for (int j = 0; j < 10; j++)
+            if (ship == data[i][j])
+                ++count;
+    if (count != 20)
+        return false;
+    // 2. Не должно быть клеток-кораблей, касающихся углами друг друга
+    for (int i = 0; i < 9; i++)
+        for (int j = 0; j < 10; j++)
+        {
+            if (ship == data[i][j])
+            {
+                if (j > 0 && ship == data[i + 1][j - 1])
+                    return false;
+                if (j < 9 && ship == data[i + 1][j + 1])
+                    return false;
+            }
+        }
+    // 3. Должен быть 1 корабль из 4-х клеток, 2 из 3-х, 3 и 2-х
+    int c2 = 0;
+    int c3 = 0;
+    int c4 = 0;
+    // по горизонтали
+    for (int i = 0; i < 10; i++)
+    {
+        count = 0;
+        for (int j = 0; j < 10; j++)
+        {
+            if (ship == data[i][j])
+            {
+                ++count;
+                continue;
+            }
+            if (empty == data[i][j])
+            {
+                switch (count)
+                {
+                case 0:
+                case 1: break;
+                case 2: ++c2; break;
+                case 3: ++c3; break;
+                case 4: ++c4; break;
+                default: return false;
+                }
+                count = 0;
+            }
+        }
+        switch (count)
+        {
+        case 0:
+        case 1: break;
+        case 2: ++c2; break;
+        case 3: ++c3; break;
+        case 4: ++c4; break;
+        default: return false;
+        }
+    }
+
+    // по вертикали
+    for (int j = 0; j < 10; j++)
+    {
+        count = 0;
+        for (int i = 0; i < 10; i++)
+        {
+            if (ship == data[i][j])
+            {
+                ++count;
+                continue;
+            }
+            if (empty == data[i][j])
+            {
+                switch (count)
+                {
+                case 0:
+                case 1: break;
+                case 2: ++c2; break;
+                case 3: ++c3; break;
+                case 4: ++c4; break;
+                default: return false;
+                }
+                count = 0;
+            }
+        }
+        switch (count)
+        {
+        case 0:
+        case 1: break;
+        case 2: ++c2; break;
+        case 3: ++c3; break;
+        case 4: ++c4; break;
+        default: return false;
+        }
+    }
+    // проверка кол-ва
+    if (c2 != 3 || c3 != 2 || c4 != 1)
+        return false;
+
+    return true;
+}
+
 unsigned int Field::shot(int i, int j)
 {
     unsigned int s = get(i, j);
