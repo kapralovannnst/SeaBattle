@@ -31,6 +31,10 @@
   <property name="windowTitle">
    <string>Морской бой</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="SeaBattleWindow.qrc">
+    <normaloff>:/SeaBattleWindow/battleship.png</normaloff>:/SeaBattleWindow/battleship.png</iconset>
+  </property>
   <widget class="QLabel" name="lPlayer">
    <property name="geometry">
     <rect>

@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="SeaBattleWindow">
-    </qresource>
+  <qresource prefix="SeaBattleWindow">
+    <file>battleship.png</file>
+  </qresource>
 </RCC>
