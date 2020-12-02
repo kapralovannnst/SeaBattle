@@ -105,14 +105,8 @@ void SeaBattleWindow::on_fvPlayer_validPlacementChanged(bool valid)
 
 void SeaBattleWindow::gameOver(bool victory)
 {
-    if (ui.bWaitConnection->isVisible())
-        control->stopServer();
-    else
-        control->disconnectClient();
-    restoreButtons();
     messageBox(QMessageBox::Information, "Игра окончена",
         victory ? "Вы победили!" : "Вы проиграли!");
-    restoreFields();
 }
 
 void SeaBattleWindow::serverConnected()
@@ -132,7 +126,10 @@ void SeaBattleWindow::networkError(const QString& text)
     else
         control->disconnectClient();
     restoreButtons();
-    messageBox(QMessageBox::Critical, "Ошибка", text);
+    if (ui.fvPlayer->gameOver() || ui.fvEnemy->gameOver())
+        messageBox(QMessageBox::Information, "Игра окончена", text);
+    else
+        messageBox(QMessageBox::Critical, "Ошибка", text);
     restoreFields();
 }
 
