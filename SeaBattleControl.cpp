@@ -138,6 +138,8 @@ void SeaBattleControl::socketReadyRead()
         mode = 0;
         receiveFieldData();
     }
+    else
+        emit networkError("Удалённый узел отправил некорректные данные");
 }
 
 void SeaBattleControl::sendFirstMove()
@@ -165,33 +167,43 @@ void SeaBattleControl::receiveFirstMove()
 {
     char x;
     socket->read(&x, 1);
-    move = x;
-    if (move)
-        window->getEnemyFV()->enableAim();
+    if (0 == x || 1 == x)
+    {
+        move = x;
+        if (move)
+            window->getEnemyFV()->enableAim();
+        else
+            mode = waitShot;
+    }
     else
-        mode = waitShot;
+        emit networkError("Удалённый узел отправил некорректные данные");
 }
 
 void SeaBattleControl::receiveShot()
 {
     char x;
     socket->read(&x, 1);
-    int i = x / 10;
-    int j = x % 10;
-    unsigned int result = window->getPlayerFV()->enemyShot(i, j);
-    sendShotResult(result);
-    if (Field::miss == result)
+    if (0 <= x && x <= 99)
     {
-        move = true;
-        window->getEnemyFV()->enableAim();
+        int i = x / 10;
+        int j = x % 10;
+        unsigned int result = window->getPlayerFV()->enemyShot(i, j);
+        sendShotResult(result);
+        if (Field::miss == result)
+        {
+            move = true;
+            window->getEnemyFV()->enableAim();
+        }
+        else
+        {
+            if (Field::death == result && window->getPlayerFV()->gameOver())
+                mode = waitFieldData;
+            else
+                mode = waitShot;
+        }
     }
     else
-    {
-        if (Field::death == result && window->getPlayerFV()->gameOver())
-            mode = waitFieldData;
-        else
-            mode = waitShot;
-    }
+        emit networkError("Удалённый узел отправил некорректные данные");
 }
 
 void SeaBattleControl::sendShotResult(unsigned int r)
@@ -205,19 +217,24 @@ void SeaBattleControl::receiveShotResult()
 {
     char x;
     socket->read(&x, 1);
-    window->getEnemyFV()->playerShotResult(shot_i, shot_j, x);
-    if (Field::miss == x)
+    if (Field::miss == x || Field::hit == x || Field::death == x)
     {
-        move = false;
-        mode = waitShot;
+        window->getEnemyFV()->playerShotResult(shot_i, shot_j, x);
+        if (Field::miss == x)
+        {
+            move = false;
+            mode = waitShot;
+        }
+        else
+        {
+            if (Field::death == x && window->getEnemyFV()->gameOver())
+                sendFieldData();
+            else
+                window->getEnemyFV()->enableAim();
+        }
     }
     else
-    {
-        if (Field::death == x && window->getEnemyFV()->gameOver())
-            sendFieldData();
-        else
-            window->getEnemyFV()->enableAim();
-    }
+        emit networkError("Удалённый узел отправил некорректные данные");
 }
 
 void SeaBattleControl::sendFieldData()
@@ -238,7 +255,10 @@ void SeaBattleControl::sendFieldData()
 void SeaBattleControl::receiveFieldData()
 {
     if (socket->bytesAvailable() < 100)
+    {
+        mode = waitFieldData;
         return;
+    }
     Field* f = window->getEnemyFV()->getField();
     for (int i = 0; i < 10; i++)
     {
@@ -246,7 +266,8 @@ void SeaBattleControl::receiveFieldData()
         {
             char x;
             socket->read(&x, 1);
-            f->set(i, j, x);
+            if (Field::empty <= x && x <= Field::hit)
+                f->set(i, j, x);
         }
     }
     window->getEnemyFV()->repaint();
